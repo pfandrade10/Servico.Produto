@@ -2,24 +2,23 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Servico.Produto.Models;
+using Servico.Produto.BaseDados;
+using Servico.Produto.Estruturas;
 
 namespace Servico.Produto.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class ProdutoController : ControllerBase
     {
         private readonly AppSettings _appSettings;
-        private readonly IWebHostEnvironment _enviornment;
 
-        public ProdutoController(IOptions<AppSettings> appSettings, IWebHostEnvironment environment)
+        public ProdutoController(IOptions<AppSettings> appSettings)
         {
             this._appSettings = appSettings.Value;
-            _enviornment = environment;
         }
 
         /// <summary>
@@ -28,26 +27,38 @@ namespace Servico.Produto.Controllers
         /// <param name="idProduto"></param>
         /// <returns></returns>
         [HttpGet]
-        public IActionResult Get(int? idProduto)
+        public EstruturaProduto Get(int? idProduto)
         {
+            EstruturaProduto estruturaProduto = new EstruturaProduto();
+
             try
             {
+                BaseProdutos baseProdutos = new BaseProdutos();
+
+                List<Models.Produto> listProdutos = new List<Models.Produto>();
+                listProdutos = baseProdutos.PopularProdutos();
+                //Criar método para popular lista de produtos
 
                 if (idProduto.HasValue)
                 {
                     //Retornar produto que contenha o id especificado
+                    estruturaProduto.Produtos = listProdutos.Where(x => x.idProduct == idProduto).ToList();
 
-                    return Ok();
+                    return estruturaProduto;
                 }
-                    
+                
+                estruturaProduto.Produtos = listProdutos;
 
                 //Retorna os produtos todos
 
-                return Ok();
+                return estruturaProduto;
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                estruturaProduto.isError = true;
+                estruturaProduto.descricaoErro = ex.Message;
+
+                return estruturaProduto;
             }
 
         }
@@ -88,7 +99,7 @@ namespace Servico.Produto.Controllers
         /// <param name="idProduto"></param>
         /// <returns></returns>
         [HttpPut]
-        public IActionResult Put([FromBody]Models.Produto produto, int idProduto)
+        public IActionResult Put([FromBody] Models.Produto produto, int idProduto)
         {
             try
             {

@@ -7,6 +7,5 @@ namespace Servico.Produto
 {
     public class AppSettings
     {
-        public string ConnectionString { get; set; }
     }
 }

@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Servico.Produto.Models;
 
-namespace Servico.Produto.Estrutura
+namespace Servico.Produto.Estruturas
 {
     public class EstruturaProduto : EstruturaErro
     {
