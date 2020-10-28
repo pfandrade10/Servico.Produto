@@ -9,7 +9,7 @@ namespace Servico.Produto.Models
     public class Produto
     {
         [Required]
-        public string idProduct { get; set; }
+        public int idProduct { get; set; }
 
         [Required]
         public string productName { get; set; }
@@ -21,6 +21,6 @@ namespace Servico.Produto.Models
         public string cathegory { get; set; }
 
         [Required]
-        public string price { get; set; }
+        public decimal price { get; set; }
     }
 }
