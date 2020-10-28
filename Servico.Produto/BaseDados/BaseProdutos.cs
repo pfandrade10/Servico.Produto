@@ -21,10 +21,10 @@ namespace Servico.Produto.BaseDados
                     Models.Produto produto = new Models.Produto
                     {
                         idProduct = i + 1,
-                        productName = "Produto " + i,
-                        description = "Descricao " + i,
-                        cathegory = $"{i}",
-                        price = 100*(i),
+                        productName = "Produto " + (i+1),
+                        description = "Descricao " + (i + 1),
+                        cathegory = $"{(i + 1)}",
+                        price = 100*(i + 1),
                     };
 
                     produtos.Add(produto);
