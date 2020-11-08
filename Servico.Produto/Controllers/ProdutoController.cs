@@ -51,6 +51,8 @@ namespace Servico.Produto.Controllers
                 
                 estruturaProduto.Produtos = listProdutos;
 
+                ListaAtual = estruturaProduto.Produtos;
+
                 return estruturaProduto;
             }
             catch (Exception ex)
@@ -69,8 +71,10 @@ namespace Servico.Produto.Controllers
         /// <param name="produto"></param>
         /// <returns></returns>
         [HttpPost]
-        public IActionResult Post(Models.Produto produto)
+        public EstruturaProduto Post(Models.Produto produto)
         {
+            EstruturaProduto estruturaProduto = new EstruturaProduto();
+
             try
             {
                 BaseProdutos baseProdutos = new BaseProdutos();
@@ -91,11 +95,16 @@ namespace Servico.Produto.Controllers
 
                 ListaAtual.Add(produto);
 
-                return Ok(ListaAtual);
+                estruturaProduto.Produtos = ListaAtual;
+
+                return estruturaProduto;
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                estruturaProduto.isError = true;
+                estruturaProduto.descricaoErro = ex.Message;
+
+                return estruturaProduto;
             }
 
         }
@@ -107,8 +116,10 @@ namespace Servico.Produto.Controllers
         /// <param name="idProduto"></param>
         /// <returns></returns>
         [HttpPut]
-        public IActionResult Put([FromBody] Models.Produto produto)
+        public EstruturaProduto Put([FromBody] Models.Produto produto)
         {
+            EstruturaProduto estruturaProduto = new EstruturaProduto();
+
             try
             {
 
@@ -143,11 +154,16 @@ namespace Servico.Produto.Controllers
 
                 ListaAtual = listaAuxiliar;
 
-                return Ok(ListaAtual);
+                estruturaProduto.Produtos = ListaAtual;
+
+                return estruturaProduto;
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                estruturaProduto.isError = true;
+                estruturaProduto.descricaoErro = ex.Message;
+
+                return estruturaProduto;
             }
 
         }
@@ -158,10 +174,13 @@ namespace Servico.Produto.Controllers
         /// <param name="idProduto"></param>
         /// <returns></returns>
         [HttpDelete]
-        public IActionResult Delete(int idProduto)
+        public EstruturaProduto Delete(int idProduto)
         {
+
+            EstruturaProduto estruturaProduto = new EstruturaProduto();
             try
             {
+                BaseProdutos baseProdutos = new BaseProdutos();
 
                 if (idProduto == 0)
                 {
@@ -170,14 +189,36 @@ namespace Servico.Produto.Controllers
                     throw new Exception("produto selecionado não existe");
                 }
 
+                List<Models.Produto> listProdutos = new List<Models.Produto>();
 
-                //Retorna os produtos todos
+                if (ListaAtual.Count == 0)
+                    listProdutos = baseProdutos.PopularProdutos();
+                else
+                    listProdutos = ListaAtual;
 
-                return Ok();
+                var listaAuxiliar = listProdutos;
+
+                foreach (var item in listProdutos)
+                {
+                    if (item.idProduct == idProduto)
+                        listaAuxiliar.Remove(item);
+                    else
+                        throw new Exception("O produto selecionado não existe");
+                }
+
+
+                ListaAtual = listaAuxiliar;
+
+                estruturaProduto.Produtos = ListaAtual;
+
+                return estruturaProduto;
             }
             catch (Exception ex)
             {
-                return StatusCode(500, ex.Message);
+                estruturaProduto.isError = true;
+                estruturaProduto.descricaoErro = ex.Message;
+
+                return estruturaProduto;
             }
 
         }
