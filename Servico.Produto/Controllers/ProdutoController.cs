@@ -16,6 +16,8 @@ namespace Servico.Produto.Controllers
     {
         private readonly AppSettings _appSettings;
 
+        List<Models.Produto> ListaAtual = new List<Models.Produto>();
+
         public ProdutoController(IOptions<AppSettings> appSettings)
         {
             this._appSettings = appSettings.Value;
@@ -49,8 +51,6 @@ namespace Servico.Produto.Controllers
                 
                 estruturaProduto.Produtos = listProdutos;
 
-                //Retorna os produtos todos
-
                 return estruturaProduto;
             }
             catch (Exception ex)
@@ -73,6 +73,7 @@ namespace Servico.Produto.Controllers
         {
             try
             {
+                BaseProdutos baseProdutos = new BaseProdutos();
 
                 if (produto == null)
                 {
@@ -83,7 +84,14 @@ namespace Servico.Produto.Controllers
 
                 //Se validações ok, inserir produto na lista
 
-                return Ok();
+                List<Models.Produto> listProdutos = new List<Models.Produto>();
+                listProdutos = baseProdutos.PopularProdutos();
+
+                ListaAtual = listProdutos;
+
+                ListaAtual.Add(produto);
+
+                return Ok(ListaAtual);
             }
             catch (Exception ex)
             {
@@ -99,22 +107,43 @@ namespace Servico.Produto.Controllers
         /// <param name="idProduto"></param>
         /// <returns></returns>
         [HttpPut]
-        public IActionResult Put([FromBody] Models.Produto produto, int idProduto)
+        public IActionResult Put([FromBody] Models.Produto produto)
         {
             try
             {
 
-                if (idProduto == 0)
-                {
-                    //Verificar e o produto escolhido existe
+                BaseProdutos baseProdutos = new BaseProdutos();
 
-                    throw new Exception("produto selecionado não existe");
+                if (produto == null)
+                    throw new Exception("o produto a ser alterado não pode ser nulo");
+                
+
+                if (produto.idProduct == 0)
+                    throw new Exception("Favor selecionar um produto!");
+
+                List<Models.Produto> listProdutos = new List<Models.Produto>();
+
+                if (ListaAtual.Count == 0)
+                    listProdutos = baseProdutos.PopularProdutos();
+                else
+                    listProdutos = ListaAtual;
+
+                var listaAuxiliar = listProdutos;
+
+                foreach (var item in listProdutos)
+                {
+                    if (item.idProduct == produto.idProduct)
+                    {
+                        listaAuxiliar.Remove(item);
+                        listaAuxiliar.Add(produto);
+                    }
+                    else
+                        throw new Exception("O produto selecionado não existe");
                 }
 
+                ListaAtual = listaAuxiliar;
 
-                //Retorna os produtos todos
-
-                return Ok();
+                return Ok(ListaAtual);
             }
             catch (Exception ex)
             {
