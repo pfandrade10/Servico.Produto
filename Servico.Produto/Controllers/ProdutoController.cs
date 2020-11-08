@@ -141,16 +141,19 @@ namespace Servico.Produto.Controllers
 
                 var listaAuxiliar = listProdutos;
 
+                Models.Produto produtoAlterado = new Models.Produto();
+
                 foreach (var item in listProdutos)
                 {
                     if (item.idProduct == produto.idProduct)
-                    {
-                        listaAuxiliar.Remove(item);
-                        listaAuxiliar.Add(produto);
-                    }
+                        produtoAlterado = item;
+
                     else
                         throw new Exception("O produto selecionado não existe");
                 }
+
+                listaAuxiliar.Remove(produtoAlterado);
+                listaAuxiliar.Add(produto);
 
                 ListaAtual = listaAuxiliar;
 
@@ -198,14 +201,17 @@ namespace Servico.Produto.Controllers
 
                 var listaAuxiliar = listProdutos;
 
+                Models.Produto produtoRemovido = new Models.Produto();
+
                 foreach (var item in listProdutos)
                 {
                     if (item.idProduct == idProduto)
-                        listaAuxiliar.Remove(item);
+                        produtoRemovido = item;
                     else
                         throw new Exception("O produto selecionado não existe");
                 }
 
+                listaAuxiliar.Remove(produtoRemovido);
 
                 ListaAtual = listaAuxiliar;
 
