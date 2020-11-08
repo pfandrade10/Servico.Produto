@@ -86,10 +86,11 @@ namespace Servico.Produto.Controllers
                 }
                 //Realizar outras validações
 
-                //Se validações ok, inserir produto na lista
-
                 List<Models.Produto> listProdutos = new List<Models.Produto>();
                 listProdutos = baseProdutos.PopularProdutos();
+
+                if (listProdutos.Where(x => x.idProduct == produto.idProduct).SingleOrDefault() != null)
+                    throw new Exception("Já existe um produto com esse Identificador registrado");
 
                 ListaAtual = listProdutos;
 
@@ -139,23 +140,15 @@ namespace Servico.Produto.Controllers
                 else
                     listProdutos = ListaAtual;
 
-                var listaAuxiliar = listProdutos;
+                Models.Produto produtoAlterado = listProdutos.Where(x => x.idProduct == produto.idProduct).SingleOrDefault();
 
-                Models.Produto produtoAlterado = new Models.Produto();
+                if (produtoAlterado == null)
+                    throw new Exception("produto selecionado não existe");
 
-                foreach (var item in listProdutos)
-                {
-                    if (item.idProduct == produto.idProduct)
-                        produtoAlterado = item;
+                listProdutos.Remove(produtoAlterado);
+                listProdutos.Add(produto);
 
-                    else
-                        throw new Exception("O produto selecionado não existe");
-                }
-
-                listaAuxiliar.Remove(produtoAlterado);
-                listaAuxiliar.Add(produto);
-
-                ListaAtual = listaAuxiliar;
+                ListaAtual = listProdutos;
 
                 estruturaProduto.Produtos = ListaAtual;
 
@@ -199,21 +192,14 @@ namespace Servico.Produto.Controllers
                 else
                     listProdutos = ListaAtual;
 
-                var listaAuxiliar = listProdutos;
+                Models.Produto produtoRemovido = listProdutos.Where(x => x.idProduct == idProduto).SingleOrDefault();
 
-                Models.Produto produtoRemovido = new Models.Produto();
+                if(produtoRemovido == null)
+                    throw new Exception("produto selecionado não existe");
 
-                foreach (var item in listProdutos)
-                {
-                    if (item.idProduct == idProduto)
-                        produtoRemovido = item;
-                    else
-                        throw new Exception("O produto selecionado não existe");
-                }
+                listProdutos.Remove(produtoRemovido);
 
-                listaAuxiliar.Remove(produtoRemovido);
-
-                ListaAtual = listaAuxiliar;
+                ListaAtual = listProdutos;
 
                 estruturaProduto.Produtos = ListaAtual;
 
