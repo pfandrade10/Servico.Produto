@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Session;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Servico.Produto.BaseDados;
 using Servico.Produto.Estruturas;
+using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 
 namespace Servico.Produto.Controllers
 {
@@ -15,8 +18,6 @@ namespace Servico.Produto.Controllers
     public class ProdutoController : ControllerBase
     {
         private readonly AppSettings _appSettings;
-
-        List<Models.Produto> ListaAtual = new List<Models.Produto>();
 
         public ProdutoController(IOptions<AppSettings> appSettings)
         {
@@ -38,7 +39,16 @@ namespace Servico.Produto.Controllers
                 BaseProdutos baseProdutos = new BaseProdutos();
 
                 List<Models.Produto> listProdutos = new List<Models.Produto>();
-                listProdutos = baseProdutos.PopularProdutos();
+
+                string ListaProdutosSession = HttpContext.Session.GetString("Produtos");
+
+                if (string.IsNullOrEmpty(ListaProdutosSession))
+                {
+                    listProdutos = baseProdutos.PopularProdutos();
+                }
+                else
+                    listProdutos = JsonConvert.DeserializeObject<List<Models.Produto>>(ListaProdutosSession);
+
                 //Criar método para popular lista de produtos
 
                 if (idProduto.HasValue)
@@ -46,12 +56,19 @@ namespace Servico.Produto.Controllers
                     //Retornar produto que contenha o id especificado
                     estruturaProduto.Produtos = listProdutos.Where(x => x.idProduct == idProduto).ToList();
 
+                    if(estruturaProduto.Produtos.Count == 0)
+                    {
+                        throw new Exception("Produto Selecionado não Existe");
+                    }
+
                     return estruturaProduto;
                 }
                 
                 estruturaProduto.Produtos = listProdutos;
 
-                ListaAtual = estruturaProduto.Produtos;
+                string listaProdutos = JsonConvert.SerializeObject(listProdutos);
+
+                HttpContext.Session.SetString("Produtos", listaProdutos);
 
                 return estruturaProduto;
             }
@@ -87,16 +104,24 @@ namespace Servico.Produto.Controllers
                 //Realizar outras validações
 
                 List<Models.Produto> listProdutos = new List<Models.Produto>();
-                listProdutos = baseProdutos.PopularProdutos();
+
+                string ListaProdutosSession = HttpContext.Session.GetString("Produtos");
+
+                if (string.IsNullOrEmpty(ListaProdutosSession))
+                    listProdutos = baseProdutos.PopularProdutos();
+                else
+                    listProdutos = JsonConvert.DeserializeObject<List<Models.Produto>>(ListaProdutosSession);
 
                 if (listProdutos.Where(x => x.idProduct == produto.idProduct).SingleOrDefault() != null)
                     throw new Exception("Já existe um produto com esse Identificador registrado");
 
-                ListaAtual = listProdutos;
+                listProdutos.Add(produto);
 
-                ListaAtual.Add(produto);
+                estruturaProduto.Produtos = listProdutos;
 
-                estruturaProduto.Produtos = ListaAtual;
+                string listaProdutos = JsonConvert.SerializeObject(estruturaProduto.Produtos);
+
+                HttpContext.Session.SetString("Produtos", listaProdutos);
 
                 return estruturaProduto;
             }
@@ -135,10 +160,12 @@ namespace Servico.Produto.Controllers
 
                 List<Models.Produto> listProdutos = new List<Models.Produto>();
 
-                if (ListaAtual.Count == 0)
+                string ListaProdutosSession = HttpContext.Session.GetString("Produtos");
+
+                if (string.IsNullOrEmpty(ListaProdutosSession))
                     listProdutos = baseProdutos.PopularProdutos();
                 else
-                    listProdutos = ListaAtual;
+                    listProdutos = JsonConvert.DeserializeObject<List<Models.Produto>>(ListaProdutosSession);
 
                 Models.Produto produtoAlterado = listProdutos.Where(x => x.idProduct == produto.idProduct).SingleOrDefault();
 
@@ -148,9 +175,11 @@ namespace Servico.Produto.Controllers
                 listProdutos.Remove(produtoAlterado);
                 listProdutos.Add(produto);
 
-                ListaAtual = listProdutos;
+                estruturaProduto.Produtos = listProdutos;
 
-                estruturaProduto.Produtos = ListaAtual;
+                string listaProdutos = JsonConvert.SerializeObject(estruturaProduto.Produtos);
+
+                HttpContext.Session.SetString("Produtos", listaProdutos);
 
                 return estruturaProduto;
             }
@@ -187,10 +216,12 @@ namespace Servico.Produto.Controllers
 
                 List<Models.Produto> listProdutos = new List<Models.Produto>();
 
-                if (ListaAtual.Count == 0)
+                string ListaProdutosSession = HttpContext.Session.GetString("Produtos");
+
+                if (string.IsNullOrEmpty(ListaProdutosSession))
                     listProdutos = baseProdutos.PopularProdutos();
                 else
-                    listProdutos = ListaAtual;
+                    listProdutos = JsonConvert.DeserializeObject<List<Models.Produto>>(ListaProdutosSession);
 
                 Models.Produto produtoRemovido = listProdutos.Where(x => x.idProduct == idProduto).SingleOrDefault();
 
@@ -199,9 +230,11 @@ namespace Servico.Produto.Controllers
 
                 listProdutos.Remove(produtoRemovido);
 
-                ListaAtual = listProdutos;
+                estruturaProduto.Produtos = listProdutos;
 
-                estruturaProduto.Produtos = ListaAtual;
+                string listaProdutos = JsonConvert.SerializeObject(estruturaProduto.Produtos);
+
+                HttpContext.Session.SetString("Produtos", listaProdutos);
 
                 return estruturaProduto;
             }
